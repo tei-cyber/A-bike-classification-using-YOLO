@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 54
+names: ['Africa Twin', 'Aprilia RSV4', 'BMW R1250GS', 'BMW S1000R', 'BMW S1000RR', 'Ducati Panigale V4', 'Ducati StreetFighter V4', 'Harley Davidson Softail', 'Harley-Davidson Sportster', 'Harley-Davidson Street Glide', 'Honda CB1000R', 'Honda CBR1000RRR', 'Honda CBR150R', 'Honda CBR500R', 'Honda CBR600RR', 'Honda CBR650R', 'Honda CMX500 Rebel', 'Honda CRF', 'Honda Gold Wing', 'Honda PCX', 'Honda Scoopy', 'KTM 1290 Super Adventure', 'KTM 1290 Super Duke R', 'Kawasaki H2R', 'Kawasaki Ninja 400', 'Kawasaki Z1000', 'Kawasaki Z900', 'Kawasaki ZX10R', 'MV Agusta F3 RC', 'MV Agusta F4', 'Suzuki GSX S150', 'Suzuki GSX-R1000', 'Suzuki GSX-R1300 Hayabusa', 'Suzuki GSX-R150', 'Suzuki GSX-R600', 'Suzuki GSX-S1000', 'Suzuki GSX-S750', 'Suzuki Intruder', 'Triumph Rocket III', 'Triumph Speed Triple 1200 RS', 'Triumph Speedmaster', 'Triumph Sprint', 'Triumph Street Scrambler', 'Triumph Tiger Explorer', 'Vespa Primavera', 'YAMAHA TMAX 530', 'Yamaha Fino 125', 'Yamaha Grand Filano Hybrid', 'Yamaha MT-07', 'Yamaha MT-09', 'Yamaha Niken', 'Yamaha R1', 'Yamaha Tracer 900', 'Yamaha Tricity']
+
+roboflow:
+  workspace: xe-i5j8x
+  project: xe-may-qhsd0
+  version: 8
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/xe-i5j8x/xe-may-qhsd0/dataset/8

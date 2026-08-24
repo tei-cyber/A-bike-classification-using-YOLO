@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bike Classifier AI</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 480px; }
+    h2 { margin-top: 0; color: #1e293b; text-align: center; }
+    .drop-zone { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: 0.2s; }
+    .drop-zone:hover { border-color: #3b82f6; background: #eff6ff; }
+    #preview { max-width: 100%; max-height: 200px; border-radius: 6px; display: none; margin: 1rem auto; }
+    button { width: 100%; padding: 0.75rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .results { margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 6px; display: none; }
+    .score-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .score-fill { height: 100%; background: #2563eb; width: 0%; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🚲 Bike Classifier</h2>
+  <div class="drop-zone" id="dropZone">
+    <p>Drag & Drop bike image here or <strong>Click to Browse</strong></p>
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+    <img id="preview" alt="Preview">
+  </div>
+  
+  <button id="predictBtn" disabled>Classify Bike</button>
+
+  <div class="results" id="resultsBox">
+    <h3 id="predictionText" style="margin:0; color:#0f172a;"></h3>
+    <p id="confidenceText" style="color:#64748b; margin: 4px 0 16px;"></p>
+    <div id="scoreList"></div>
+  </div>
+</div>
+
+<script>
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+  const predictBtn = document.getElementById('predictBtn');
+  const resultsBox = document.getElementById('resultsBox');
+  let selectedFile = null;
+
+  dropZone.onclick = () => fileInput.click();
+  fileInput.onchange = (e) => handleFile(e.target.files[0]);
+  
+  dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = '#2563eb'; };
+  dropZone.ondragleave = () => { dropZone.style.borderColor = '#cbd5e1'; };
+  dropZone.ondrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  };
+
+  function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    selectedFile = file;
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+    predictBtn.disabled = false;
+    resultsBox.style.display = 'none';
+  }
+
+  predictBtn.onclick = async () => {
+    if (!selectedFile || predictBtn.disabled) return;
+
+    // 1. Lock UI & show loading state
+    predictBtn.disabled = true;
+    predictBtn.innerText = "⏳ Classifying... Please wait";
+    dropZone.style.pointerEvents = "none"; // Block file drop/selection while loading
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await fetch("/predict", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || `Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        document.getElementById('predictionText').innerText = data.prediction;
+        document.getElementById('confidenceText').innerText = `Confidence: ${data.confidence}`;
+
+        const scoreList = document.getElementById('scoreList');
+        scoreList.innerHTML = '';
+        for (const [cls, score] of Object.entries(data.all_scores)) {
+          scoreList.innerHTML += `
+            <div style="margin-bottom:8px; font-size:14px;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>${cls}</span><span>${score}</span>
+              </div>
+              <div class="score-bar"><div class="score-fill" style="width:${score}"></div></div>
+            </div>`;
+        }
+        resultsBox.style.display = 'block';
+      } else {
+        alert(`Prediction failed: ${data.prediction}`);
+      }
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      // 2. Unlock UI & restore button state
+      predictBtn.disabled = false;
+      predictBtn.innerText = "Classify Bike";
+      dropZone.style.pointerEvents = "auto";
+    }
+  };
+</script>
+</body>
+</html>
